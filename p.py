@@ -5,6 +5,11 @@ import spacy
 from spacy.matcher import Matcher
 import re
 import src.get_sinonimos as sinonimos
+from spacy import displacy
+import pickle
+
+#directoria da db
+db_dir = './db/db_dict.txt'
 
 # Load modelo
 nlp = spacy.load("pt_core_news_md")
@@ -93,8 +98,21 @@ for i in range(len(text_list)):
 ##
 #### [{"LOWER": "san"}, {"LOWER": "francisco"}]
 ####ferramentas_sinonimos
-sinonimos_ceramica = [{"LOWER": sinonimo} for sinonimo in sinonimos.get('cerâmica')]
-sinonimos_vidro = [{"LOWER": sinonimo} for sinonimo in sinonimos.get('vidro')]
+#sinonimos_ceramica = [{"LOWER": sinonimo} for sinonimo in sinonimos.get_synonyms('cerâmica')]
+#sinonimos_vidro = [{"LOWER": sinonimo} for sinonimo in sinonimos.get_synonyms('vidro')]
+
+try:
+    # Open the file for reading
+    with open(db_dir, 'rb') as file:
+        # Load the dictionary from the file
+        db_dict = pickle.load(file)
+except:
+    db_dict = {'CAMADA': [],
+                'LOC': [],
+                'DATE': [],
+                'PERSON': [],
+                'PER' : [],
+                'PHYSICAL_OBJECT' : []}
 
 
 ######
@@ -103,33 +121,41 @@ sinonimos_vidro = [{"LOWER": sinonimo} for sinonimo in sinonimos.get('vidro')]
 ## Alterações do modelo
 ruler = nlp.add_pipe("entity_ruler")
 
+#padrões para camadas
 pattern_camada = [{'LEMMA': 'camada'},
                   {'POS': 'ADJ'}]
 
-patterns = [{"label": "CAMADA", "pattern": pattern_camada}]
+# padrões para datas
+pattern_date  = [{"TEXT": {"REGEX": "[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}"}}]
+pattern_date2 = [{"TEXT": {"REGEX":"[0-9]{1,2}"}},
+                 {"TEXT": {"REGEX":"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\b"}},
+                 {"TEXT": {"REGEX":" [0-9]{4}\b"}}]
+pattern_date3 = [
+         {"IS_DIGIT": True}, 
+         {"LOWER":"de"},
+         {"LOWER":{"IN":["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro","jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]}},
+         {"LOWER":"de"},
+         {"IS_DIGIT": True},
+     ]
+
+#padrões para pessoas (tem falhas)
+pattern_person = [{"POS": "PROPN"},
+                  {"POS": "PROPN"}]
+
+physical_object_list = ["espátula","pá","peneira","balde"]
+
+#Physical Object
+pattern_physical_object = [{"LEMMA": {"IN": physical_object_list}}]
+
+
+patterns = [{"label": "CAMADA", "pattern": pattern_camada},
+            {"label": "DATE", "pattern": pattern_date},
+            {"label": "DATE", "pattern": pattern_date2},
+            {"label": "DATE", "pattern": pattern_date3},
+            {"label": "PERSON", "pattern": pattern_person},
+            {"label": "PHYSICAL_OBJECT", "pattern": pattern_physical_object}]
 
 ruler.add_patterns(patterns)
-
-
-#####
-
-### Matcher
-
-##matcher = Matcher(nlp.vocab)
-# Add match ID "HelloWorld" with no callback and one pattern
-##pattern = [{"TEXT": {"REGEX": ".*camada(.|\0)*"}}]
-
-#matcher = Matcher(nlp.vocab)
-#matcher.add("Camada", None, [{'POS': 'PROPN', 'OP':'+'}, {'TEXT': {'REGEX': '(?i)^(?:camada)$'}}])
-
-# Matches "love cats" or "likes flowers"
-pattern1 = [{"LEMMA": {"IN": ["camada"]}},
-            {"LEMMA": {"IN": ["camadas"]}},
-            {"LEMMA": {"IN": ["uma camada"]}}]
-
-matcher = Matcher(nlp.vocab)
-matcher.add("CAMADA", [pattern1])
-
 
 # Criação de um dicionario onde vai guardar os resultados do modelo aplicado a cada texto
 docn = {}
@@ -160,46 +186,34 @@ for docnx in docn:
     entities = []
     [entities.append((entity.text,entity.label_)) for entity in doc.ents if (entity.text,entity.label_) not in entities]
 
+    #adicionar as camadas ao dicionario
+    for entity in doc.ents:
+        if (entity.label_ == "CAMADA" and entity.text not in db_dict['CAMADA']):
+            db_dict['CAMADA'].append(entity.text)
+
+        elif (entity.label_ == "DATE" and entity.text not in db_dict['DATE']):
+            db_dict['DATE'].append(entity.text)
+
+        elif (entity.label_ == "LOC" and entity.text not in db_dict['LOC']):
+            db_dict['LOC'].append(entity.text)
+
+        elif ((entity.label_ == "PER" or entity.label_ == "PERSON") and entity.text not in db_dict['PER']):
+            db_dict['PER'].append(entity.text)
+
+        elif (entity.label_ == "PHYSICAL_OBJECT" and entity.text not in db_dict['PHYSICAL_OBJECT']):
+            db_dict['PHYSICAL_OBJECT'].append(entity.text)
 
     for entity in entities:
         print(entity[0], entity[1])
 
+    #print(db_dict)
+    #displacy.serve(doc, style="ent")
 
-    print("Matcher full text")
 
-    expression = "camada ([^ ]*)"
-    for match in re.finditer(expression, doc.text):
-        start, end = match.span()
-        span = doc.char_span(start, end)
-        # This is a Span object or None if match doesn't map to valid token sequence
-        if span is not None:
-            print(span.text, "CAMADA")
-
-    """
-
-    ## print matches
-    #matches = matcher(doc)
-    #spans = [doc[start:end] for _, start, end in matches]
-    #for span in spacy.util.filter_spans(spans):
-    #    print(span.text)
-
-    print("Matcher doc")
-    pattern = [{'LEMMA': 'camada'},
-               {'POS': 'NOUN'}]
-
-    matcher = Matcher(nlp.vocab)
-    matcher.add("CAMADA", [pattern1])
-
-    matches = matcher(doc)
-
-    for match_id, start, end in matches:
-        string_id = nlp.vocab.strings[match_id]  # Get string representation
-        span = doc[start:end]  # The matched span
-        #span = doc.char_span(start, end)
-        print(match_id, string_id, start, end, span.text)
-    """
-
-    print("------------------------------------------------------")
+# Open a file for writing
+with open(db_dir, 'wb') as file:
+    # Write the dictionary to the file
+    pickle.dump(db_dict, file)
 
 
 # links

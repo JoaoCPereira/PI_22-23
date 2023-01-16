@@ -59,7 +59,7 @@ patterns_Period = [ [{'LEMMA': 'século'},{'POS': 'ADJ'}],
 physical_object_list = ["espátula","pá","peneira","balde"]
 pattern_Physical_Object = [{"LEMMA": {"IN": physical_object_list}}]
 
-patterns =  [{"label": "Period", "pattern": pattern_period} for pattern_period in patterns_Period]+\
+patterns =  [{"label": "PERIOD", "pattern": pattern_period} for pattern_period in patterns_Period]+\
             [{"label": "DATE", "pattern": pattern_date} for pattern_date in patterns_Date]+\
             [{"label": "DATE", "pattern": pattern_physical_object} for pattern_physical_object in pattern_Physical_Object]
 

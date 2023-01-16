@@ -1,5 +1,3 @@
-# pip install bs4
-# pip install lxml
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -85,7 +83,6 @@ def print_debug(filepath, text, doc):
         non_phrases = []
         [non_phrases.append(chunk.text) for chunk in doc.noun_chunks if doc.noun_chunks not in non_phrases]
 
-        print(non_phrases)
         file.write("-"*120)
         file.write("\nNoun phrases: ['"+"', '".join(non_phrases)+"]\n")
 

@@ -1,6 +1,3 @@
-# pip install -U spacy
-# python -m spacy download en_core_web_sm
-
 from spacy import displacy
 from spacy.matcher import Matcher
 import src.tools as tool

@@ -76,27 +76,39 @@ for ent in doc.ents:
         if ent.text not in ontology['E4 Period']:
             ontology['E4 Period'].append(ent.text)
 
-    if ent.label_ == "LOC":
+    elif ent.label_ == "LOC":
         if ent.text not in ontology['E53 Place']:
             ontology['E53 Place'].append(ent.text)
 
-    #if ent.label_ == "VERB": # verificar se é um verbo de mover/acção
+    #elif ent.label_ == "VERB": # verificar se é um verbo de mover/acção
     #    if ent.text not in ontology['E9 Move']:
     #        ontology['E9 Move'].append(ent.text)
 
-    if ent.label_ == "PER":
+    elif ent.label_ == "PER":
         if ent.text not in ontology['E39 Actor']:
             ontology['E39 Actor'].append(ent.text)
 
-    if ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT": # difirenciar se é um Pyshical object ou Physical thing
-        if ent.text not in ontology['E19 Physical Object']:
-            ontology['E19 Physical Object'].append(ent.text)
+    elif ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT": # difirenciar se é um Pyshical object ou Physical thing
+        if ent.text.lower() not in ontology['E19 Physical Object']:
+            ontology['E19 Physical Object'].append(ent.text.lower())
 
 # Iterar sobre cada token do texto
 for token in doc:
         if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
             if "conj" not in token.dep_ and token.lemma_ not in ontology['E9 Move']:
                 ontology['E9 Move'].append(token.lemma_)
+
+        elif token.text.lower() == "camada":
+            # Get the next token in the document
+            next_token = doc[token.i + 1]
+            # ADP   <!-- de, em, a, por, com, para, como, entre, sobre, até -->
+            # ADV   <!-- não, mais, já, também, ainda, ontem, só, depois, muito, como -->
+            # SCONJ <!-- que, a, de, para, se, porque, como, por, em, quando -->
+            # PUNCT <!-- ,, ., «, », (, ), –, :, ?, ; -->
+            if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT"\
+             and (next_token.text.lower() not in ontology['E18 Physical Thing']):
+                # Add to ontology
+                ontology['E18 Physical Thing'].append(next_token.text.lower())
 
 
 if (debug):

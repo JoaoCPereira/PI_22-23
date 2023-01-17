@@ -11,6 +11,7 @@ ontology_dir  = './db/ontology.txt'
 txt_dir = './text.txt'
 new_ontology = './ontology.txt'
 debug_dir = './debug.txt'
+physical_objects_dir = './db/physical_objects.txt'
 
 
 ## Loads
@@ -56,7 +57,7 @@ patterns_Period = [ [{'LEMMA': {"REGEX": '[sS]éculo'}},{'POS': {"IN": ['ADJ','N
                      {'TEXT': {"REGEX": Dig_Roman}}] ]
 
 #Physical Object
-physical_object_list = ["espátula","pá","peneira","balde","prato"]
+physical_object_list = tool.read_physical_objects_file(physical_objects_dir)
 pattern_Physical_Object = [{"LEMMA": {"IN": physical_object_list}}]
 
 patterns =  [{"label": "PERIOD", "pattern": pattern_period} for pattern_period in patterns_Period]+\

@@ -69,6 +69,11 @@ def read_file_to_string(filepath):
     with open(filepath, 'r') as file:
         return file.read()
 
+# Ler lista de physical objects
+def read_physical_objects_file(filepath):
+    stringFile = read_file_to_string(filepath)
+    return stringFile.split(',')
+
 # Function to write dictionary to a .txt file
 def write_dict_to_txt(filepath, dictionary):
     with open(filepath, 'w') as file:

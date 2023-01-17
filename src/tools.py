@@ -77,19 +77,24 @@ def print_debug(filepath, text, doc):
 
     # Open the file for writing
     with open(filepath, 'w') as file:
-        file.write("-"*120)
-        file.write("\nPreprocessed text:"+'\n'+text+"\n")
+        file.write('-'*120)
+        file.write("\nPreprocessed text:\n\n"+text+"\n")
 
         non_phrases = []
         [non_phrases.append(chunk.text) for chunk in doc.noun_chunks if doc.noun_chunks not in non_phrases]
 
-        file.write("-"*120)
-        file.write("\nNoun phrases: ['"+"', '".join(non_phrases)+"]\n")
+        file.write('-'*120+'\nNoun phrases:\n')
+        file.write("\n['"+"', '".join(non_phrases)+"]\n")
 
-        ### debug print all tokens
-        file.write("-"*120)
+        # debug print all tokens
+        file.write('-'*120+'\nAll tokens:\n')
         file.write("\n{:<20} {:<20} {:<20} {:<20} {:<20} {:<20} {:<20} {:<20}".format("Text","Lemma","POS","Tag","Dep","Shape","alpha","stop"))
         for token in doc:
             file.write("\n{:<20} {:<20} {:<20} {:<20} {:<20} {:<20} {:<20} {:<20}".format(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
                     token.shape_, token.is_alpha, token.is_stop))
-        file.write("-"*120)
+
+        # debug print all entities
+        file.write('-'*120+'\nAll Entities\n')
+        for ent in doc.ents:
+            file.write("\n{:<20} {:<20}".format(ent.label_, ent.text))
+        file.write('\n'+'-'*120)

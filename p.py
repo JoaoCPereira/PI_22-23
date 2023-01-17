@@ -61,7 +61,7 @@ pattern_Physical_Object = [{"LEMMA": {"IN": physical_object_list}}]
 
 patterns =  [{"label": "PERIOD", "pattern": pattern_period} for pattern_period in patterns_Period]+\
             [{"label": "DATE", "pattern": pattern_date} for pattern_date in patterns_Date]+\
-            [{"label": "DATE", "pattern": pattern_physical_object} for pattern_physical_object in pattern_Physical_Object]
+            [{"label": "PHYSICAL_OBJECT", "pattern": pattern_physical_object} for pattern_physical_object in pattern_Physical_Object]
 
 ruler.add_patterns(patterns)
 
@@ -95,8 +95,8 @@ for ent in doc.ents:
 # Iterar sobre cada token do texto
 for token in doc:
         if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
-            if "conj" not in token.dep_ and token.text not in ontology['E9 Move']:
-                ontology['E9 Move'].append(token.text)
+            if "conj" not in token.dep_ and token.lemma_ not in ontology['E9 Move']:
+                ontology['E9 Move'].append(token.lemma_)
 
 
 if (debug):

@@ -1,9 +1,10 @@
-from spacy import displacy
-from spacy.matcher import Matcher
-import src.tools as tool
 import spacy
+from spacy import displacy
+from spacy import displacy
+import src.tools as tool
+import re
 
-debug = False
+debug = True
 
 #directorias
 ontology_dir  = './db/ontology.txt'
@@ -33,6 +34,9 @@ text = tool.remove_duplicate_spaces(text)
 ## Alterações do modelo
 ruler = nlp.add_pipe("entity_ruler")
 
+# padrão 0-4 digitos ou numeros romanos
+Dig_Roman = '[0-9]{1,4}|M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})'
+
 # padrões para datas
 patterns_Date = [   [{"TEXT": {"REGEX": "[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}"}}],
                     [{"TEXT": {"REGEX":"[0-9]{1,2}"}},{"TEXT": {"REGEX":"\b(\
@@ -47,16 +51,12 @@ patterns_Date = [   [{"TEXT": {"REGEX": "[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}"}}],
                         {"LOWER":"de"},{"IS_DIGIT": True},] ]
 
 # padrões para períodos
-patterns_Period = [ [{'LEMMA': 'século'},{'POS': 'ADJ'}],
-                    [{'LEMMA': 'século'},{'POS': 'ADJ'}],
-                    [{'LEMMA': 'Século'},{'POS': 'NUM'}],
-                    [{'LEMMA': 'século'},{'POS': 'NUM'}],
-                    [{'LEMMA': 'Século'},{'POS': 'PROPN'}],
-                    [{'LEMMA': 'Século'},{'POS': 'PROPN'}]  ]
-
+patterns_Period = [ [{'LEMMA': {"REGEX": '[sS]éculo'}},{'POS': {"IN": ['ADJ','NUM','PROPN']}}],\
+                    [{'LEMMA': {"REGEX": '[sS]éculo'}},\
+                     {'TEXT': {"REGEX": Dig_Roman}}] ]
 
 #Physical Object
-physical_object_list = ["espátula","pá","peneira","balde"]
+physical_object_list = ["espátula","pá","peneira","balde","prato"]
 pattern_Physical_Object = [{"LEMMA": {"IN": physical_object_list}}]
 
 patterns =  [{"label": "PERIOD", "pattern": pattern_period} for pattern_period in patterns_Period]+\
@@ -72,30 +72,28 @@ doc = nlp(text)
 
 # Itera sobre cada entidade do texto
 for ent in doc.ents:
-    if ent.label_ == "DATE" or ent.label_ == "PERIOD":
-        if ent.text not in ontology['E4 Period']:
+    if ent.label_ == "DATE" or ent.label_ == "PERIOD" and ent.text not in ontology['E4 Period']:
             ontology['E4 Period'].append(ent.text)
 
-    elif ent.label_ == "LOC":
-        if ent.text not in ontology['E53 Place']:
+    elif ent.label_ == "LOC" and ent.text not in ontology['E53 Place']:
             ontology['E53 Place'].append(ent.text)
 
     #elif ent.label_ == "VERB": # verificar se é um verbo de mover/acção
     #    if ent.text not in ontology['E9 Move']:
     #        ontology['E9 Move'].append(ent.text)
 
-    elif ent.label_ == "PER":
-        if ent.text not in ontology['E39 Actor']:
-            ontology['E39 Actor'].append(ent.text)
+    elif ent.label_ == "PER" and ent.text not in ontology['E39 Actor']:
+        ontology['E39 Actor'].append(ent.text)
 
-    elif ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT": # difirenciar se é um Pyshical object ou Physical thing
-        tool.add_synonyms(ent.text.lower(),'E19 Physical Object',ontology)
+    elif ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT" and ent.text.lower() not in ontology['E19 Physical Object']:
+        # diferenciar se é um Pyshical object ou Physical thing
+        ontology['E19 Physical Object'].append(ent.text)
 
 # Iterar sobre cada token do texto
 for token in doc:
         if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
             if "conj" not in token.dep_ :
-                tool.add_synonyms(token.lemma_,'E9 Move',ontology)
+                tool.add_synonyms('',token.lemma_,'E9 Move',ontology)
 
         elif token.text.lower() == "camada":
             # Get the next token in the document
@@ -105,12 +103,27 @@ for token in doc:
             # SCONJ <!-- que, a, de, para, se, porque, como, por, em, quando -->
             # PUNCT <!-- ,, ., «, », (, ), –, :, ?, ; -->
             if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT":
-                tool.add_synonyms(next_token.text.lower(),'E18 Physical Thing',ontology)
+                tool.add_synonyms('camada ',next_token.text.lower(),'E18 Physical Thing',ontology)
+
+        elif token.text.lower() == "século":
+            # Get the next token in the document
+            next_token = doc[token.i + 1]
+            text_tokens = token.text.lower()+' '+next_token.text
+
+            # verificar se o padrão Dig_Roman se encontra na string text_tokens
+            haRegex = re.compile(Dig_Roman)
+            if (haRegex.search(next_token.text) != None and text_tokens not in ontology['E4 Period']):
+                ontology['E4 Period'].append(text_tokens)
+
+        elif token.text.lower() in physical_object_list and token.text.lower() not in ontology['E19 Physical Object']:
+            ontology['E19 Physical Object'].append(token.text.lower())
+
 
 if (debug):
     tool.print_debug(debug_dir,text,doc,ontology)
 
 tool.print_ontology(ontology)
+#displacy.serve(doc, style="ent")
 
 # guardar a nova ontologia
 tool.write_dict_to_txt(new_ontology,ontology)

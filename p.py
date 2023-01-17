@@ -3,7 +3,7 @@ from spacy.matcher import Matcher
 import src.tools as tool
 import spacy
 
-debug = True
+debug = False
 
 #directorias
 ontology_dir  = './db/ontology.txt'
@@ -89,14 +89,13 @@ for ent in doc.ents:
             ontology['E39 Actor'].append(ent.text)
 
     elif ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT": # difirenciar se é um Pyshical object ou Physical thing
-        if ent.text.lower() not in ontology['E19 Physical Object']:
-            ontology['E19 Physical Object'].append(ent.text.lower())
+        tool.add_synonyms(ent.text.lower(),'E19 Physical Object',ontology)
 
 # Iterar sobre cada token do texto
 for token in doc:
         if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
-            if "conj" not in token.dep_ and token.lemma_ not in ontology['E9 Move']:
-                ontology['E9 Move'].append(token.lemma_)
+            if "conj" not in token.dep_ :
+                tool.add_synonyms(token.lemma_,'E9 Move',ontology)
 
         elif token.text.lower() == "camada":
             # Get the next token in the document
@@ -105,14 +104,11 @@ for token in doc:
             # ADV   <!-- não, mais, já, também, ainda, ontem, só, depois, muito, como -->
             # SCONJ <!-- que, a, de, para, se, porque, como, por, em, quando -->
             # PUNCT <!-- ,, ., «, », (, ), –, :, ?, ; -->
-            if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT"\
-             and (next_token.text.lower() not in ontology['E18 Physical Thing']):
-                # Add to ontology
-                ontology['E18 Physical Thing'].append(next_token.text.lower())
-
+            if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT":
+                tool.add_synonyms(next_token.text.lower(),'E18 Physical Thing',ontology)
 
 if (debug):
-    tool.print_debug(debug_dir,text,doc)
+    tool.print_debug(debug_dir,text,doc,ontology)
 
 tool.print_ontology(ontology)
 

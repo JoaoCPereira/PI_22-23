@@ -18,6 +18,15 @@ def get_synonyms(word):
     except:
         return []
 
+# função para adicionar sinonimos de uma "word"
+# a categorita "category" da ontologia "ontology"
+def add_synonyms(word, category, ontology):
+    # get_synonyms do word
+    for word_synonym in get_synonyms(word):
+        # veriificar se o word_synonym não esta na lista "category" da "ontology"
+        if word_synonym not in ontology[category]:
+            ontology[category].append(word_synonym)
+
 ## Pre-processamento
 
 # Converte uma string para lowercase (minusculas)
@@ -73,7 +82,7 @@ def print_ontology(ontology):
     for category, entities in ontology.items():
         print(category + ": " + str(entities))
 
-def print_debug(filepath, text, doc):
+def print_debug(filepath, text, doc, ontology):
 
     # Open the file for writing
     with open(filepath, 'w') as file:
@@ -98,3 +107,21 @@ def print_debug(filepath, text, doc):
         for ent in doc.ents:
             file.write("\n{:<20} {:<20}".format(ent.label_, ent.text))
         file.write('\n'+'-'*120)
+
+        # debug get_synonyms
+        file.write('\nGet_synonyms:\n')
+        for category, entities in ontology.items():
+            file.write('\n'+category+'\n')
+            for ent in entities:
+                file.write('\t'+ent+": ['"+"', '".join(get_synonyms(ent))+']\n')
+
+        file.write('\n'+'-'*120)
+
+        # debug Ontology
+        file.write('\nOntology:\n')
+        for category, entities in ontology.items():
+            file.write('\n'+category+'\n')
+            for ent in entities:
+                file.write('\t'+ent+'\n')
+
+        file.write('-'*120)

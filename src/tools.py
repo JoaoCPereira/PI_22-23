@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import re
+import networkx as nx
+import matplotlib.pyplot as plt
+import pyvis.network as net
 
 # foi escolhido este website pois é o dicionario da porto editora
 web = 'https://www.infopedia.pt/dicionarios/lingua-portuguesa/'
@@ -86,6 +89,50 @@ def read_dict_from_txt(filepath):
             return json.load(file)
     except:
         return {'E39 Actor': [], 'E9 Move': [], 'E19 Physical Object': [],'E18 Physical Thing': [], 'E4 Period': [], 'E53 Place': []}
+    
+def print_Graph(ontology):
+    # cria um grafo vazio
+    G = nx.DiGraph()
+
+    # adiciona os nós
+    for node in ontology.keys():
+        G.add_node(node)
+    
+    for node, edges in ontology.items():
+        for edge in edges:
+            G.add_edge(node, edge, label='is a' )
+
+    # adiciona as arestas com labels
+    G.add_edge('E4 Period', 'E53 Place', label='P7 took place at (withnessed)',relation="1:N")
+    G.add_edge('E4 Period', 'E18 Physical Thing', label='P7 took place on or within (withnessed)',relation="0:N")
+    G.add_edge('E18 Physical Thing', 'E53 Place', label='P59 has section (is located on or within',relation="0:N")
+    G.add_edge('E18 Physical Thing', 'E53 Place', label='P53 has former or current location (is formeror or current location of)',relation="0:N")
+    G.add_edge('E19 Physical Object', 'E18 Physical Thing')
+    G.add_edge('E19 Physical Object', 'E53 Place', label='P55 has current location (currently holds)',relation="0:N")
+    G.add_edge('E9 Move', 'E19 Physical Object', label='P25 moved (moved by)',relation="1:N")
+    G.add_edge('E53 Place', 'E94 Space Primitive', label='P168 place is defined by (defines place)',relation="0:N")
+    G.add_edge('E53 Place', 'E94 Space Primitive', label='P171 at some place within',relation="0:N")
+    G.add_edge('E53 Place', 'E94 Space Primitive', label='P172 contains',relation="0:N")
+    G.add_edge('E9 Move', 'E53 Place', label='P26 move to (was destination of)',relation="1:N")
+    G.add_edge('E9 Move', 'E53 Place', label='P27 move from (was origin of)',relation="1:N")
+    G.add_edge('E53 Place', 'E53 Place', label='P189 approximates',relation="0:N")
+    G.add_edge('E53 Place', 'E53 Place', label='P89 falls within (contains)',relation="0:N")
+    G.add_edge('E53 Place', 'E53 Place', label='P122 borders with',relation="0:N")
+    G.add_edge('E53 Place', 'E53 Place', label='P121 overlaps with',relation="0:N")
+    G.add_edge('E39 Actor', 'E53 Place', label='P74 has current or former residence (is current or former residence of)',relation="0:N")
+
+    # Criar o objeto pyvis
+    vis = net.Network(height="950px")
+
+   # Adicionar o grafo
+    vis.from_nx(G)
+    vis.barnes_hut()
+
+    #vis.show_buttons()
+
+    # Mostra o grafo
+    vis.show("ontology.html")
+
 
 def print_ontology(ontology):
     for category, entities in ontology.items():

@@ -4,7 +4,7 @@ from spacy import displacy
 import src.tools as tool
 import re
 
-debug = True
+debug = False
 
 #directorias
 ontology_dir  = './db/ontology.txt'
@@ -21,6 +21,8 @@ nlp = spacy.load("pt_core_news_md")
 # Load ontology struct
 ontology = tool.read_dict_from_txt(ontology_dir)
 
+tool.print_Graph(ontology)
+
 # Load text
 text = tool.read_file_to_string(txt_dir)
 
@@ -36,7 +38,7 @@ text = tool.remove_duplicate_spaces(text)
 ruler = nlp.add_pipe("entity_ruler")
 
 # padrão 0-4 digitos ou numeros romanos
-Dig_Roman = '[0-9]{1,4}|M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})'
+Dig_Roman = '(\d+|[MDCLXVI]{1,7})' 
 
 # padrões para datas
 patterns_Date = [   [{"TEXT": {"REGEX": "[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}"}}],
@@ -92,39 +94,40 @@ for ent in doc.ents:
 
 # Iterar sobre cada token do texto
 for token in doc:
-        if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
-            if "conj" not in token.dep_ :
-                tool.add_synonyms('',token.lemma_,'E9 Move',ontology)
+    if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
+        if "conj" not in token.dep_ :
+            tool.add_synonyms('',token.lemma_,'E9 Move',ontology)
 
-        elif token.text.lower() == "camada":
-            # Get the next token in the document
-            next_token = doc[token.i + 1]
-            # ADP   <!-- de, em, a, por, com, para, como, entre, sobre, até -->
-            # ADV   <!-- não, mais, já, também, ainda, ontem, só, depois, muito, como -->
-            # SCONJ <!-- que, a, de, para, se, porque, como, por, em, quando -->
-            # PUNCT <!-- ,, ., «, », (, ), –, :, ?, ; -->
-            if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT":
-                tool.add_synonyms('camada ',next_token.text.lower(),'E18 Physical Thing',ontology)
+    elif token.text.lower() == "camada":
+        # Get the next token in the document
+        next_token = doc[token.i + 1]
+        # ADP   <!-- de, em, a, por, com, para, como, entre, sobre, até -->
+        # ADV   <!-- não, mais, já, também, ainda, ontem, só, depois, muito, como -->
+        # SCONJ <!-- que, a, de, para, se, porque, como, por, em, quando -->
+        # PUNCT <!-- ,, ., «, », (, ), –, :, ?, ; -->
+        if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT":
+            tool.add_synonyms('camada ',next_token.text.lower(),'E18 Physical Thing',ontology)
 
-        elif token.text.lower() == "século":
-            # Get the next token in the document
-            next_token = doc[token.i + 1]
-            text_tokens = token.text.lower()+' '+next_token.text
-
-            # verificar se o padrão Dig_Roman se encontra na string text_tokens
-            haRegex = re.compile(Dig_Roman)
-            if (haRegex.search(next_token.text) != None and text_tokens not in ontology['E4 Period']):
-                ontology['E4 Period'].append(text_tokens)
-
-        elif token.text.lower() in physical_object_list and token.text.lower() not in ontology['E19 Physical Object']:
-            ontology['E19 Physical Object'].append(token.text.lower())
+    elif token.text.lower() == "século":
+        # Get the next token in the document
+        next_token = doc[token.i + 1]
+        text_tokens = token.text.lower()+' '+next_token.text
+        # verificar se o padrão Dig_Roman se encontra na string text_tokens
+        haRegex = re.compile(Dig_Roman)
+        if (haRegex.search(next_token.text) != None and text_tokens not in ontology['E4 Period']):
+            ontology['E4 Period'].append(text_tokens)
+            
+    elif token.text.lower() in physical_object_list and token.text.lower() not in ontology['E19 Physical Object']:
+        ontology['E19 Physical Object'].append(token.text.lower())
 
 
 if (debug):
     tool.print_debug(debug_dir,text,doc,ontology)
 
-tool.print_ontology(ontology)
+#tool.print_ontology(ontology)
 #displacy.serve(doc, style="ent")
+
+tool.print_Graph(ontology)
 
 # guardar a nova ontologia
 tool.write_dict_to_txt(new_ontology,ontology)

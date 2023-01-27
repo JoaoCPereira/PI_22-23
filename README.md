@@ -4,6 +4,10 @@
 
 ![alt text](Doc/On_init.png "Ontologia")
 
+## Grafo da Ontologia Inicial
+
+![alt text](Doc/On_init_graph.png "Grafo Ontologia")
+
 ### Padrão para identificar
 - [X] **E4 Period (esta a identificar algumas datas e algumas épocas (ex: Século XX), com padrões)**
 - [X] **E53 Place (esta a utilizar a label "LOC" do modelo "pt_core_news_md")**

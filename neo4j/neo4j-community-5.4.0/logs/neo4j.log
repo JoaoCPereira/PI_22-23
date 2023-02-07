@@ -178,3 +178,15 @@ Caused by: java.nio.channels.ClosedChannelException
 	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.85.Final.jar:4.1.85.Final]
 	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.85.Final.jar:4.1.85.Final]
 	... 1 more
+2023-02-07 16:13:20.575+0000 INFO  Neo4j Server shutdown initiated by request
+2023-02-07 16:13:20.588+0000 INFO  Stopping...
+2023-02-07 16:13:26.070+0000 INFO  Stopped.
+2023-02-07 16:14:24.211+0000 INFO  Starting...
+2023-02-07 16:14:25.305+0000 INFO  This instance is ServerId{ea7b2c04} (ea7b2c04-5c47-4d97-8675-e542fbfa5e12)
+2023-02-07 16:14:27.479+0000 INFO  ======== Neo4j 5.4.0 ========
+2023-02-07 16:14:41.717+0000 INFO  Bolt enabled on localhost:7687.
+2023-02-07 16:14:44.394+0000 INFO  Remote interface available at http://localhost:7474/
+2023-02-07 16:14:44.399+0000 INFO  id: 1AC7C631A5547ACB52ACCE3A338F184D4021C9ACD68FD41DBF4CF6D968E60B14
+2023-02-07 16:14:44.400+0000 INFO  name: system
+2023-02-07 16:14:44.400+0000 INFO  creationDate: 2023-02-07T09:46:02.667Z
+2023-02-07 16:14:44.400+0000 INFO  Started.

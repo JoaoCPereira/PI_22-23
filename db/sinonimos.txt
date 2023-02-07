@@ -1,1 +1,1 @@
-{}
+{"referir": ["aludir", "atribuir", "contar", "dizer", "expor", "imputar", "mencionar", "narrar", "referenciar", "relatar"], "identificar": ["nomear", "reconhecer"], "permitir": ["admitir", "aprovar", "assentir", "autorizar", "ceder", "consentir", "possibilitar", "tolerar", "transigir"], "descobrir": ["aclarar", "alvejar", "avistar", "clarear", "clarificar", "delatar", "denunciar", "desobscurecer", "despontar", "discernir", "distinguir", "divisar", "encontrar", "exibir", "expor", "malsinar", "mostrar", "nascer", "patentear", "perceber", "romper", "surgir"]}

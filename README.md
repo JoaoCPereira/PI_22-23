@@ -28,3 +28,46 @@
 
 ## Ontologia Final
 ![alt text](Doc/On.png "Ontologia")
+
+# Como utilizar
+
+## 1. Instalar os requirements
+```
+pip3 install -r requirements.txt
+```
+
+## 2. Colocar o texto que se deseja processar no ficheiro text.txt
+
+## 3. (Opcional) Colocar uma ontologia, sinónimos e/ou lista dos objectos físicos na directoria./db
+> **Os nomes dos ficheiros têm de ser "ontology.txt" para a ontologia e "sinonimos.txt" para os sinónimos, no formato de dicionário**
+> **O nome do ficheiro para os objetos tem de ser "physical_objects.txt", no formato de texto separado por ','**
+
+> ### Exemplo ficheiro "ontology.txt"
+> ![alt text](Doc/On_txt.png "ontology.txt")
+
+> ### Exemplo ficheiro "sinonimos.txt"
+> ![alt text](Doc/sin.png "sinonimos.txt")
+
+> ### Exemplo ficheiro "physical_objects.txt"
+> ![alt text](Doc/p_o.png "physical_objects.txt")
+
+## 4. Executar o programa
+```
+python3 p.py
+```
+
+## 5. Iniciar o Neo4J
+```
+./neo4j/neo4j-community-5.4.0/bin/neo4j-admin server console
+```
+
+## 6. Cypher para carregar o grafo no Neo4J
+> **Alterar os valores "-u neo4j -p neo4jneo4j" para os valores definidos pelo utilizador**
+```
+./neo4j/cypher-shell-5.4.0/bin/cypher-shell -u neo4j -p neo4jneo4j --format plain < ontology.cypher
+```
+
+## 7. Comando para ver todos os nodos
+```
+MATCH (n) RETURN n
+```

@@ -12,7 +12,7 @@ txt_dir = './text.txt'
 new_ontology = './ontology.txt'
 debug_dir = './debug.txt'
 physical_objects_dir = './db/physical_objects.txt'
-
+sinonimos_dir = './db/sinonimos.txt'
 
 ## Loads
 # Load modelo
@@ -20,12 +20,12 @@ nlp = spacy.load("pt_core_news_md")
 
 # Load ontology struct
 ontology = tool.read_dict_from_txt(ontology_dir)
+sinonimos = tool.read_dict_from_txt(sinonimos_dir)
 
 tool.print_Graph(ontology)
 
 # Load text
 text = tool.read_file_to_string(txt_dir)
-
 
 ## Pré-processamento
 
@@ -75,28 +75,29 @@ doc = nlp(text)
 
 # Itera sobre cada entidade do texto
 for ent in doc.ents:
-    if ent.label_ == "DATE" or ent.label_ == "PERIOD" and ent.text not in ontology['E4 Period']:
-            ontology['E4 Period'].append(ent.text)
+    if ent.label_ == "DATE" or ent.label_ == "PERIOD" and ent.text not in ontology['E4_Period']:
+            ontology['E4_Period'].append(ent.text)
 
-    elif ent.label_ == "LOC" and ent.text not in ontology['E53 Place']:
-            ontology['E53 Place'].append(ent.text)
+    elif ent.label_ == "LOC" and ent.text not in ontology['E94_Space_Primitive']:
+            ontology['E94_Space_Primitive'].append(ent.text)
 
     #elif ent.label_ == "VERB": # verificar se é um verbo de mover/acção
     #    if ent.text not in ontology['E9 Move']:
     #        ontology['E9 Move'].append(ent.text)
 
-    elif ent.label_ == "PER" and ent.text not in ontology['E39 Actor']:
-        ontology['E39 Actor'].append(ent.text)
+    elif ent.label_ == "PER" and ent.text not in ontology['E39_Actor']:
+        ontology['E39_Actor'].append(ent.text)
 
-    elif ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT" and ent.text.lower() not in ontology['E19 Physical Object']:
+    elif ent.label_ == "OBJE" or ent.label_ == "PHYSICAL_OBJECT" and ent.text.lower() not in ontology['E19_Physical_Object']:
         # diferenciar se é um Pyshical object ou Physical thing
-        ontology['E19 Physical Object'].append(ent.text)
+        ontology['E19_Physical_Object'].append(ent.text)
+
 
 # Iterar sobre cada token do texto
 for token in doc:
     if token.pos_ == "VERB": # verifica se é um verbo de mover/acção
         if "conj" not in token.dep_ :
-            tool.add_synonyms('',token.lemma_,'E9 Move',ontology)
+            tool.add_synonyms('',token.lemma_,'E9_Move',ontology,sinonimos)
 
     elif token.text.lower() == "camada":
         # Get the next token in the document
@@ -106,7 +107,7 @@ for token in doc:
         # SCONJ <!-- que, a, de, para, se, porque, como, por, em, quando -->
         # PUNCT <!-- ,, ., «, », (, ), –, :, ?, ; -->
         if next_token.pos_ != "ADP" and next_token.pos_ != "ADV" and next_token.pos_ != "SCONJ" and next_token.pos_ != "PUNCT":
-            tool.add_synonyms('camada ',next_token.text.lower(),'E18 Physical Thing',ontology)
+            tool.add_synonyms('camada ',next_token.text.lower(),'E18_Physical_Thing',ontology,sinonimos)
 
     elif token.text.lower() == "século":
         # Get the next token in the document
@@ -114,12 +115,11 @@ for token in doc:
         text_tokens = token.text.lower()+' '+next_token.text
         # verificar se o padrão Dig_Roman se encontra na string text_tokens
         haRegex = re.compile(Dig_Roman)
-        if (haRegex.search(next_token.text) != None and text_tokens not in ontology['E4 Period']):
-            ontology['E4 Period'].append(text_tokens)
+        if (haRegex.search(next_token.text) != None and text_tokens not in ontology['E4_Period']):
+            ontology['E4_Period'].append(text_tokens)
             
-    elif token.text.lower() in physical_object_list and token.text.lower() not in ontology['E19 Physical Object']:
-        ontology['E19 Physical Object'].append(token.text.lower())
-
+    elif token.text.lower() in physical_object_list and token.text.lower() not in ontology['E19_Physical_Object']:
+        ontology['E19_Physical_Object'].append(token.text.lower())
 
 if (debug):
     tool.print_debug(debug_dir,text,doc,ontology)
@@ -127,7 +127,12 @@ if (debug):
 #tool.print_ontology(ontology)
 #displacy.serve(doc, style="ent")
 
-tool.print_Graph(ontology)
+#tool.print_Graph(ontology)
+
+tool.create_cypher(ontology)
 
 # guardar a nova ontologia
 tool.write_dict_to_txt(new_ontology,ontology)
+
+# guardar os sinonimos
+tool.write_dict_to_txt(sinonimos_dir,sinonimos)

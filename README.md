@@ -1,7 +1,7 @@
 # PI_22-23
 
 # Trabalho: Extração (semi)Automática de uma Ontologia com Base em Relatórios Arqueológicos
-> As ontologias podem ser descritas como uma estruturas de dados que aco- lhem os objetos e seus relacionamento (bem como a sua semântica) acerca de um dado domínio de conhecimento. Através de uma ontologia é possível descobrir e explorar o conhecimento nela armazenado presente, de forma muito flexível, de acordo com as várias vertentes do conhecimento nela representado. Neste trabalho pretende-se desenvolver uma aplicação Web que permita fazer a extra- ção (semi) automática do conhecimento contido em relatórios arqueológicos, de forma a disponibilizar uma ontologia específica para esse domínio.\
+> As ontologias podem ser descritas como estruturas de dados que acolhem objetos e seus relacionamentos (bem como sua semântica) acerca de um dado domínio de conhecimento. Através de uma ontologia, é possível descobrir e explorar o conhecimento nela armazenado de forma muito flexível, de acordo com as várias vertentes do conhecimento que ela representa. Neste trabalho, pretende-se desenvolver uma aplicação Web que permita a extração (semi)automática do conhecimento contido em relatórios arqueológicos, a fim de disponibilizar uma ontologia específica para esse domínio.
 > Resultado: Aplicação Web
 
 ## Ontologia Inicial

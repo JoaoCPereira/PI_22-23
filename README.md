@@ -1,8 +1,7 @@
 # PI_22-23
 
-# Trabalho: Extração (semi)Automática de uma Ontolo- gia com base em Relatórios Arqueológicos
-> Supervisor: obelo@di.uminho.pt\
-> As ontologias podem ser descritas como uma estruturas de dados que acolhem os objetos e seus relacionamento (bem como a sua semântica) acerca de um dado domínio de conhecimento. Através de uma ontologia é possível descobrir e explorar o conhecimento nela armazenado presente, de forma muito flexível, de acordo com as várias vertentes do conhecimento nela representado. Neste trabalho pretende-se desenvolver uma aplicação Web que permita fazer a extração (semi) automática do conhecimento contido em relatórios arqueológicos, de forma a disponibilizar uma ontologia específica para esse domínio.\
+# Trabalho: Extração (semi)Automática de uma Ontologia com Base em Relatórios Arqueológicos
+> As ontologias podem ser descritas como uma estruturas de dados que aco- lhem os objetos e seus relacionamento (bem como a sua semântica) acerca de um dado domínio de conhecimento. Através de uma ontologia é possível descobrir e explorar o conhecimento nela armazenado presente, de forma muito flexível, de acordo com as várias vertentes do conhecimento nela representado. Neste trabalho pretende-se desenvolver uma aplicação Web que permita fazer a extra- ção (semi) automática do conhecimento contido em relatórios arqueológicos, de forma a disponibilizar uma ontologia específica para esse domínio.\
 > Resultado: Aplicação Web
 
 ## Ontologia Inicial
@@ -36,14 +35,19 @@
 
 # Como utilizar
 
-## 1. Instalar os requirements
+## 1. Instalar os requisitos
 ```
 pip3 install -r requirements.txt
 ```
 
-## 2. Colocar o texto que se deseja processar no ficheiro text.txt
+## 2. Download spaCy "Portuguese pipeline"
+```
+python -m spacy download pt_core_news_md
+```
 
-## 3. (Opcional) Colocar uma ontologia, sinónimos e/ou lista dos objectos físicos na directoria./db
+## 3. Colocar o texto que se deseja processar no ficheiro text.txt
+
+## 4. (Opcional) Colocar uma ontologia, sinónimos e/ou lista dos objetos físicos na diretoria "./db"
 > **Os nomes dos ficheiros têm de ser "ontology.txt" para a ontologia e "sinonimos.txt" para os sinónimos, no formato de dicionário**\
 > **O nome do ficheiro para os objetos tem de ser "physical_objects.txt", no formato de texto separado por ','**
 > ### Exemplo ficheiro "ontology.txt"
@@ -53,23 +57,36 @@ pip3 install -r requirements.txt
 > ### Exemplo ficheiro "physical_objects.txt"
 > ![alt text](Doc/p_o.png "physical_objects.txt")
 
-## 4. Executar o programa
+## 5. Executar o programa
 ```
 python3 p.py
 ```
 
-## 5. Iniciar o Neo4J
+## 6. Iniciar o Neo4J (é necessário o JDK 17)
 ```
 ./neo4j/neo4j-community-5.4.0/bin/neo4j-admin server console
 ```
 
-## 6. Cypher para carregar o grafo no Neo4J
+## 7. Cypher para carregar o grafo no Neo4J
 > **Alterar os valores "-u neo4j -p neo4jneo4j" para os valores definidos pelo utilizador**
 ```
 ./neo4j/cypher-shell-5.4.0/bin/cypher-shell -u neo4j -p neo4jneo4j --format plain < ontology.cypher
 ```
 
-## 7. Comando para ver todos os nodos
+## 8. Visualizar resultado final no Neo4J
+
+### 8.1. Abrir o Neo4J no browser
+```
+http://localhost:7474/
+```
+
+### 8.2. Fazer login com os dados definidos anteriormente
+```
+user: neo4j
+pass: neo4jneo4j
+```
+
+### 8.3. Comando para ver todos os nós
 ```
 MATCH (n) RETURN n
 ```

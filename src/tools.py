@@ -162,6 +162,7 @@ def create_cypher(dictionary):
                 value = value.replace(".", "_")
                 value = value.replace("(", "_")
                 value = value.replace(")", "_")
+                value = value.replace("’", "_")
                 if value[0].isdigit():
                     value = "d" + value
                 cypherfile.write("CREATE (:"+ value +":`"+value+"` {name:\""+ value +"\"});\n")
